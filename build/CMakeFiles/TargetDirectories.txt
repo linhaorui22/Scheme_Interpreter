@@ -1,0 +1,3 @@
+/mnt/c/Codefield/CODE_C++/SchemeInterpreter-main/SchemeInterpreter-main/build/CMakeFiles/code.dir
+/mnt/c/Codefield/CODE_C++/SchemeInterpreter-main/SchemeInterpreter-main/build/CMakeFiles/edit_cache.dir
+/mnt/c/Codefield/CODE_C++/SchemeInterpreter-main/SchemeInterpreter-main/build/CMakeFiles/rebuild_cache.dir

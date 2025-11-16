@@ -907,19 +907,48 @@ Value Quote::eval(Assoc& e) {
                         if(list_syn->stxs.empty()){
                             return NullV();
                         }
-                        Value car_value = Quote(Syntax(list_syn->stxs[0])).eval(e);
-                        if(list_syn->stxs.size() > 1){
-                            List* listt = new List();
-                            for(int i = 1 ; i< list_syn->stxs.size();i++){
-                                listt->stxs.push_back(list_syn->stxs[i]);
+                        if (list_syn->stxs.size() == 3) {
+                            auto first = dynamic_cast<SymbolSyntax*>(list_syn->stxs[1].get());
+                            if (first && first->s == ".") {
+                                Value car = Quote(list_syn->stxs[0]).eval(e);
+                                Value cdr = Quote(list_syn->stxs[2]).eval(e);
+                                return PairV(car, cdr);
                             }
-                            Value cdr_value = Quote(Syntax(listt)).eval(e);
-                            return PairV(car_value,cdr_value);
                         }
-                        else {
-                            Value cdr_value = NullV();
-                            return PairV(car_value,cdr_value);
+                        for (size_t i = 0; i < list_syn->stxs.size(); i++) {
+                            auto dot_sym = dynamic_cast<SymbolSyntax*>(list_syn->stxs[i].get());
+                            if (dot_sym && dot_sym->s == ".") {
+                                if (i < 1 || i >= list_syn->stxs.size() - 1) {
+                                    throw RuntimeError("");
+                                }
+                                Value front = NullV();
+                                for (int j = i - 1; j >= 0; j--) {
+                                    Value current = Quote(list_syn->stxs[j]).eval(e);
+                                    front = PairV(current, front);
+                                }
+                                Value tail = Quote(list_syn->stxs[i + 1]).eval(e);
+                                if (front->v_type == V_NULL) {
+                                    return tail;
+                                } else {
+                                    Value current = front;
+                                    while (current->v_type == V_PAIR) {
+                                        Pair* pair = dynamic_cast<Pair*>(current.get());
+                                        if (pair->cdr->v_type == V_NULL) {
+                                            pair->cdr = tail;
+                                            break;
+                                        }
+                                    current = pair->cdr;
+                                    }
+                                    return front;
+                                }
+                            }
                         }
+                        Value ans = NullV();
+                        for (int i = list_syn->stxs.size() - 1; i >= 0; i--) {
+                            Value now = Quote(list_syn->stxs[i]).eval(e);
+                            ans = PairV(now, ans);
+                        }
+                        return ans;
                     }
                 }
             }

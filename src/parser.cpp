@@ -38,7 +38,6 @@ Expr Number::parse(Assoc &env) {
 
 Expr RationalSyntax::parse(Assoc &env) {
     return Expr (new RationalNum(numerator,denominator));
-    //TODO: complete the rational parser
 }
 
 Expr SymbolSyntax::parse(Assoc &env) {
@@ -403,7 +402,7 @@ Expr List::parse(Assoc &env) {
                     else {
                         vector<Expr> clauses_expr;
                         for(auto& expr : list->stxs){
-                            clauses_expr.push_back(expr.parse(env));
+                            clauses_expr.push_back(expr->parse(env));
                         }
                         clauses.push_back(clauses_expr);
                     }
@@ -432,7 +431,7 @@ Expr List::parse(Assoc &env) {
                                 parameters.push_back(symbol->s);
                             }
                         }
-                        return Expr(new Lambda(parameters,stxs[2].parse(env)));
+                        return Expr(new Lambda(parameters,stxs[2]->parse(env)));
                     }
                 }
                 break;
@@ -446,7 +445,7 @@ Expr List::parse(Assoc &env) {
                     string define_str;
                     SymbolSyntax* symbol = dynamic_cast<SymbolSyntax*>(stxs[1].get());
                     if(symbol){
-                        return Expr(new Define(symbol->s,stxs[2].parse(env)));
+                        return Expr(new Define(symbol->s,stxs[2]->parse(env)));
                     }
                     List* list = dynamic_cast<List*>(stxs[1].get());
                     if(list && list->stxs.empty()){
@@ -463,7 +462,7 @@ Expr List::parse(Assoc &env) {
                             }
                             parameters.push_back(para->s);
                         }
-                        return Expr(new Define(define_name->s,Expr(new Lambda(parameters,stxs[2].parse(env)))));
+                        return Expr(new Define(define_name->s,Expr(new Lambda(parameters,stxs[2]->parse(env)))));
                     }
                 }
                 break;
@@ -487,10 +486,10 @@ Expr List::parse(Assoc &env) {
                     if(!symbol){
                         throw RuntimeError("");
                     }
-                    pair<string,Expr> pp = {symbol->s,p->stxs[1].parse(env)};
+                    pair<string,Expr> pp = {symbol->s,p->stxs[1]->parse(env)};
                     pair_let.push_back(pp);
                 }
-                return Expr(new Let(pair_let,stxs[2].parse(env)));
+                return Expr(new Let(pair_let,stxs[2]->parse(env)));
                 break;
             }
             case E_LETREC:{
@@ -512,10 +511,10 @@ Expr List::parse(Assoc &env) {
                     if(!symbol){
                         throw RuntimeError("");
                     }
-                    pair<string,Expr> pp = {symbol->s,p->stxs[1].parse(env)};
+                    pair<string,Expr> pp = {symbol->s,p->stxs[1]->parse(env)};
                     pair_letrec.push_back(pp);
                 }
-                return Expr(new Letrec(pair_letrec,stxs[2].parse(env)));
+                return Expr(new Letrec(pair_letrec,stxs[2]->parse(env)));
                 break;
             }
             case E_SET:{

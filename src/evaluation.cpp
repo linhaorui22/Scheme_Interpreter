@@ -74,6 +74,12 @@ Value Variadic::eval(Assoc &e) { // evaluation of multi-operator primitive
     return evalRator(Args);
 }
 
+bool check_number (char c){
+    if(c == '0' || c == '1'|| c == '2'|| c == '3'|| c == '4'|| c == '5'|| c == '6'|| c == '7'|| c == '8'|| c == '9' ){
+        return true;
+    }
+    return false;
+}
 Value Var::eval(Assoc &e) { // evaluation of variable
     // TODO: TO identify the invalid variable
     // We request all valid variable just need to be a symbol,you should promise:
@@ -82,7 +88,36 @@ Value Var::eval(Assoc &e) { // evaluation of variable
     //Variable names can overlap with primitives and reserve_words
     //Variable names can contain any non-whitespace characters except #, ', ", `, but the first character cannot be a digit
     //When a variable is not defined in the current scope, your interpreter should output RuntimeError
-    
+    //bool flag1 = true;
+    char c = x[0];
+    if(check_number(c) || c == '.' || c == '@'){
+        throw RuntimeError("");
+    }
+    for(char t : x){
+        if(c == '#' ||  c == '\'' || c == '\"' || c == '`' ){
+            throw RuntimeError("");
+        }
+    }
+    /*bool flag2 = false;
+    int start = 0;
+    if (!x.empty() && (x[0] == '+' || x[0] == '-')) {
+        start = 1;
+        if (x.length() == 1) {
+            flag1 = false;
+        }
+    }
+    for (int i = start; i < x.length() && flag1; i++) {
+        if (check_number(x[i])) {
+            flag2 = true;
+        } else if (x[i] == '.' || x[i] == 'e' || x[i] == 'E') {
+            continue;
+        } else {
+            flag1 = false;
+        }
+    }
+    if (flag1 && flag2) {
+        throw RuntimeError("");
+    }*/
     Value matched_value = find(x, e);
     if (matched_value.get() == nullptr) {
         if (primitives.count(x)) {
@@ -113,7 +148,7 @@ Value Var::eval(Assoc &e) { // evaluation of variable
                 //TODO
                 return ProcedureV(it->second.second,it->second.first,e);
             }
-      }
+        }
     }
     return matched_value;
 }
@@ -872,11 +907,25 @@ Value Quote::eval(Assoc& e) {
                         if(list_syn->stxs.empty()){
                             return NullV();
                         }
+                        Value car_value = Quote(Syntax(list_syn->stxs[0])).eval(e);
+                        if(list_syn->stxs.size() > 1){
+                            List* listt = new List();
+                            for(int i = 1 ; i< list_syn->stxs.size();i++){
+                                listt->stxs.push_back(list_syn->stxs[i]);
+                            }
+                            Value cdr_value = Quote(Syntax(listt)).eval(e);
+                            return PairV(car_value,cdr_value);
+                        }
+                        else {
+                            Value cdr_value = NullV();
+                            return PairV(car_value,cdr_value);
+                        }
                     }
                 }
             }
         }
     }
+    return NullV();
 }
 
 

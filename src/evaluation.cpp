@@ -318,7 +318,18 @@ Value PlusVar::evalRator(const std::vector<Value> &args) { // + with multiple ar
     else {
         Value ans = args[0];
         int l_args = args.size();
-        int ans_num,ans_den;
+        if(l_args == 1){
+            return ans;
+        }
+        else {
+            
+            for(int i = 1 ; i < l_args; i ++){
+                Plus plus(Expr(nullptr),Expr(nullptr));
+                ans = plus.evalRator(ans,args[i]);
+            }
+            return ans;
+        }
+        /*int ans_num,ans_den;
         if(ans->v_type == V_INT){
             ans_num = dynamic_cast<Integer*>(ans.get())->n;
             ans_den = 1;
@@ -349,7 +360,8 @@ Value PlusVar::evalRator(const std::vector<Value> &args) { // + with multiple ar
             return IntegerV(ans_num/ans_den);
         } else {
             return RationalV(ans_num,ans_den);
-        }
+        }*/
+
     }
 }
 
@@ -361,7 +373,17 @@ Value MinusVar::evalRator(const std::vector<Value> &args) { // - with multiple a
     else {
         Value ans = args[0];
         int l_args = args.size();
-        int ans_num,ans_den;
+        if(l_args == 1){
+            return ans;
+        }
+        else {
+            for(int i = 1 ; i < l_args ; i++){
+                Minus minus(Expr(nullptr),Expr(nullptr));
+                ans = minus.evalRator(ans,args[i]);
+            }
+            return ans;
+        }
+        /*int ans_num,ans_den;
         if(ans->v_type == V_INT){
             ans_num = dynamic_cast<Integer*>(ans.get())->n;
             ans_den = 1;
@@ -392,7 +414,7 @@ Value MinusVar::evalRator(const std::vector<Value> &args) { // - with multiple a
             return IntegerV(ans_num/ans_den);
         } else {
             return RationalV(ans_num,ans_den);
-        }
+        }*/
     }
 }
 
@@ -404,7 +426,17 @@ Value MultVar::evalRator(const std::vector<Value> &args) { // * with multiple ar
     else {
         Value ans = args[0];
         int l_args = args.size();
-        int ans_num,ans_den;
+        if(l_args == 1){
+            return ans;
+        }
+        else {
+            for(int i = 1; i < l_args; i++){
+                Mult mult(Expr(nullptr),Expr(nullptr));
+                ans = mult.evalRator(ans,args[i]);
+            }
+            return ans;
+        }
+        /*int ans_num,ans_den;
         if(ans->v_type == V_INT){
             ans_num = dynamic_cast<Integer*>(ans.get())->n;
             ans_den = 1;
@@ -435,7 +467,7 @@ Value MultVar::evalRator(const std::vector<Value> &args) { // * with multiple ar
             return IntegerV(ans_num/ans_den);
         } else {
             return RationalV(ans_num,ans_den);
-        }
+        }*/
     }
 }
 
@@ -447,7 +479,17 @@ Value DivVar::evalRator(const std::vector<Value> &args) { // / with multiple arg
     else {
         Value ans = args[0];
         int l_args = args.size();
-        int ans_num,ans_den;
+        if(l_args == 1){
+            return ans;
+        }
+        else {
+            for(int i = 1; i < l_args ; i++){
+                Div div(Expr(nullptr),Expr(nullptr));
+                ans = div.evalRator(ans,args[i]);
+            }
+            return ans;
+        }
+        /*int ans_num,ans_den;
         if(ans->v_type == V_INT){
             ans_num = dynamic_cast<Integer*>(ans.get())->n;
             ans_den = 1;
@@ -481,7 +523,7 @@ Value DivVar::evalRator(const std::vector<Value> &args) { // / with multiple arg
             return IntegerV(ans_num/ans_den);
         } else {
             return RationalV(ans_num,ans_den);
-        }
+        }*/
     }
 }
 

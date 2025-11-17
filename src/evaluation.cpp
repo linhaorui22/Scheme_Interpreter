@@ -482,6 +482,7 @@ Value DivVar::evalRator(const std::vector<Value> &args) { // / with multiple arg
         if(l_args == 1){
             return ans;
         }
+        /*
         else {
             for(int i = 1; i < l_args ; i++){
                 Div div(Expr(nullptr),Expr(nullptr));
@@ -489,7 +490,8 @@ Value DivVar::evalRator(const std::vector<Value> &args) { // / with multiple arg
             }
             return ans;
         }
-        /*int ans_num,ans_den;
+        */
+        int ans_num,ans_den;
         if(ans->v_type == V_INT){
             ans_num = dynamic_cast<Integer*>(ans.get())->n;
             ans_den = 1;
@@ -523,7 +525,7 @@ Value DivVar::evalRator(const std::vector<Value> &args) { // / with multiple arg
             return IntegerV(ans_num/ans_den);
         } else {
             return RationalV(ans_num,ans_den);
-        }*/
+        }
     }
 }
 
@@ -841,7 +843,7 @@ Value IsList::evalRator(const Value &rand) { // list?
 Value Car::evalRator(const Value &rand) { // car
     //TODO: To complete the car logic
     if(rand->v_type != V_PAIR){
-        throw RuntimeError("Wrong typename");
+        throw RuntimeError("Wrong typename 1");
     }
     Pair* p = dynamic_cast<Pair*>(rand.get());
     return p->car;
@@ -850,7 +852,7 @@ Value Car::evalRator(const Value &rand) { // car
 Value Cdr::evalRator(const Value &rand) { // cdr
     //TODO: To complete the cdr logic
     if(rand->v_type != V_PAIR){
-        throw RuntimeError("Wrong typename");
+        throw RuntimeError("Wrong typename 2");
     }
     Pair* p = dynamic_cast<Pair*>(rand.get());
     return p->cdr;
@@ -859,7 +861,7 @@ Value Cdr::evalRator(const Value &rand) { // cdr
 Value SetCar::evalRator(const Value &rand1, const Value &rand2) { // set-car!
     //TODO: To complete the set-car! logic
     if(rand1->v_type != V_PAIR){
-        throw RuntimeError("Wrong typename");
+        throw RuntimeError("Wrong typename 3");
     }
     Pair* p = dynamic_cast<Pair*>(rand1.get());
     p->car = rand2;
@@ -869,7 +871,7 @@ Value SetCar::evalRator(const Value &rand1, const Value &rand2) { // set-car!
 Value SetCdr::evalRator(const Value &rand1, const Value &rand2) { // set-cdr!
    //TODO: To complete the set-cdr! logic
    if(rand1->v_type != V_PAIR){
-        throw RuntimeError("Wrong typename");
+        throw RuntimeError("Wrong typename 4");
     }
     Pair* p = dynamic_cast<Pair*>(rand1.get());
     p->cdr = rand2;
@@ -963,7 +965,64 @@ Value Quote::eval(Assoc& e) {
                         if(list_syn->stxs.empty()){
                             return NullV();
                         }
-                        if (list_syn->stxs.size() == 3) {
+                        
+                        int dot_num = 0;
+                        int dot_pos = -1;
+                        int l_stxs = list_syn->stxs.size();
+                        for(int i = 0 ; i < l_stxs ; i++){
+                            if(auto sym = dynamic_cast<SymbolSyntax*>(list_syn->stxs[i].get())){
+                                if(sym->s == "."){
+                                    dot_num ++;
+                                    dot_pos = i;
+                                }
+                            }
+                        }
+                        //std::cout<<1<<std::endl;
+                        if(dot_num > 0 ){
+                            if(dot_num > 1){
+                                //std::cout<<2<<std::endl;
+                                throw RuntimeError("a");
+                            }
+                            if(dot_pos != l_stxs - 2){
+                                //std::cout<<3<<std::endl;
+                                throw RuntimeError("b");
+                            }
+                            if(dot_pos == 0 || dot_pos == l_stxs - 1){
+                                //std::cout<<4<<std::endl;
+                                throw RuntimeError("c");
+                            }
+                            Value car = NullV();
+                            for(int i = dot_pos - 1 ; i >= 0 ; i --){
+                                Value now = Quote(list_syn->stxs[i]).eval(e);
+                                car = PairV(now,car);
+                            }
+                            Value cdr = Quote(list_syn->stxs[dot_pos+1]).eval(e);
+                            if(dot_pos > 1){
+                                Value now = car;
+                                while(now->v_type == V_PAIR){
+                                    Pair* pair = dynamic_cast<Pair*>(now.get());
+                                    if(pair->cdr->v_type == V_NULL){
+                                        pair->cdr = cdr;
+                                        break;
+                                    }
+                                    now = pair->cdr;
+                                }
+                                return car;
+                            }
+                            else {
+                                return PairV(Quote(list_syn->stxs[0]).eval(e),cdr);
+                            }
+                        }
+                        else {
+                            Value ans = NullV();
+                            for(int i = l_stxs - 1 ; i >= 0 ;i --){
+                                Value now = Quote(list_syn->stxs[i]).eval(e);
+                                ans = PairV(now,ans);
+                            }
+                            return ans;
+                        }
+                        
+                        /*if (list_syn->stxs.size() == 3) {
                             auto first = dynamic_cast<SymbolSyntax*>(list_syn->stxs[1].get());
                             if (first && first->s == ".") {
                                 Value car = Quote(list_syn->stxs[0]).eval(e);
@@ -1004,7 +1063,7 @@ Value Quote::eval(Assoc& e) {
                             Value now = Quote(list_syn->stxs[i]).eval(e);
                             ans = PairV(now, ans);
                         }
-                        return ans;
+                        return ans;*/
                     }
                 }
             }
@@ -1033,17 +1092,13 @@ Value AndVar::eval(Assoc &e) { // and with short-circuit evaluation
     if(rands.empty()){
         return BooleanV(true);//判断是否为空 
     }
-    bool flag = true;
     int  l_rands = rands.size();
-    for(int i = 0 ;i < l_rands ; i++){
+    for(int i = 0 ;i < l_rands-1 ; i++){
         if(rands[i]->eval(e)->v_type == V_BOOL && !dynamic_cast<Boolean*>(rands[i]->eval(e).get())->b){
-            flag = false;
+            return BooleanV(false);
         }
     }
-    if(flag == true){
-        return rands[l_rands-1]->eval(e);
-    }
-    return BooleanV(false);
+    return rands[l_rands-1]->eval(e);
 }
 
 Value OrVar::eval(Assoc &e) { // or with short-circuit evaluation
@@ -1064,14 +1119,13 @@ Value OrVar::eval(Assoc &e) { // or with short-circuit evaluation
     if(rands.empty()){
         return BooleanV(false);
     }
-    bool flag = false;
     int l_rands = rands.size();
-    for(int i = 0 ; i < l_rands ; i++){
+    for(int i = 0 ; i < l_rands-1 ; i++){
         if(rands[i]->eval(e)->v_type != V_BOOL || dynamic_cast<Boolean*>(rands[i]->eval(e).get())->b){
             return rands[i]->eval(e);
         }
     }
-    return BooleanV(flag);
+    return rands[l_rands-1]->eval(e);
 }
 
 Value Not::evalRator(const Value &rand) { // not

@@ -817,11 +817,25 @@ Value ListFunc::evalRator(const std::vector<Value> &args) { // list function
 
 Value IsList::evalRator(const Value &rand) { // list?
     //TODO: To complete the list? logic
-    Value now = rand;
-    while (rand->v_type == V_PAIR){
-        now = dynamic_cast<Pair*>(now.get())->cdr;
+    if(rand->v_type == V_NULL){
+        return BooleanV(true);
     }
-    return BooleanV(now->v_type == V_NULL);
+    if(rand->v_type != V_PAIR){
+        return BooleanV(false);
+    }
+    Value now = rand;
+    while ( now->v_type == V_PAIR ){
+        Pair* pair = dynamic_cast<Pair*>(now.get());
+        Value next = pair->cdr;
+        if(next->v_type == V_NULL){
+            return BooleanV(true);
+        }
+        if(next->v_type != V_PAIR){
+            return BooleanV(false);
+        }
+        now = next;
+    }
+    return BooleanV(false);
 }
 
 Value Car::evalRator(const Value &rand) { // car
@@ -1003,6 +1017,7 @@ Value Quote::eval(Assoc& e) {
 
 Value AndVar::eval(Assoc &e) { // and with short-circuit evaluation
     //TODO: To complete the and logic
+    /*
     if(rands.empty()){
         return BooleanV(true);
     }
@@ -1014,10 +1029,26 @@ Value AndVar::eval(Assoc &e) { // and with short-circuit evaluation
         }
     }
     return BooleanV(flag);
+    */
+    if(rands.empty()){
+        return BooleanV(true);//判断是否为空 
+    }
+    bool flag = true;
+    int  l_rands = rands.size();
+    for(int i = 0 ;i < l_rands ; i++){
+        if(rands[i]->eval(e)->v_type == V_BOOL && !dynamic_cast<Boolean*>(rands[i]->eval(e).get())->b){
+            flag = false;
+        }
+    }
+    if(flag == true){
+        return rands[l_rands-1]->eval(e);
+    }
+    return BooleanV(false);
 }
 
 Value OrVar::eval(Assoc &e) { // or with short-circuit evaluation
     //TODO: To complete the or logic
+    /*
     if(rands.empty()){
         return BooleanV(true);
     }
@@ -1026,6 +1057,18 @@ Value OrVar::eval(Assoc &e) { // or with short-circuit evaluation
     for(int i=0;i<l_rands;i++){
         if(rands[i]->eval(e)->v_type != V_BOOL || dynamic_cast<Boolean*>(rands[i]->eval(e).get())->b){
             flag = true;
+        }
+    }
+    return BooleanV(flag);
+    */
+    if(rands.empty()){
+        return BooleanV(false);
+    }
+    bool flag = false;
+    int l_rands = rands.size();
+    for(int i = 0 ; i < l_rands ; i++){
+        if(rands[i]->eval(e)->v_type != V_BOOL || dynamic_cast<Boolean*>(rands[i]->eval(e).get())->b){
+            return rands[i]->eval(e);
         }
     }
     return BooleanV(flag);

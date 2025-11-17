@@ -935,9 +935,9 @@ Value Begin::eval(Assoc &e) {
     if(es.empty()){
         return VoidV();
     }    
-    Value ans = es[0]->eval(e);
+    Value ans = NullV();
     int l_es = es.size();
-    for(int i = 1;i<l_es;i++){
+    for(int i = 0;i<l_es;i++){
         ans = es[i]->eval(e);
     }
     return ans;

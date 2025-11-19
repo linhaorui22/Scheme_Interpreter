@@ -108,12 +108,7 @@ Expr List::parse(Assoc &env) {
                 return Expr(new Plus(parameters[0], parameters[1])); 
             }
             else {
-                if(parameters.size() >=3){
-                    return Expr(new PlusVar(parameters));
-                }
-                else {
-                    throw RuntimeError("Wrong number of agruments for +");
-                }
+                return Expr(new PlusVar(parameters));
             }
         } else if (op_type == E_MINUS) {
             //TODO: TO COMPLETE THE LOGIC
@@ -121,12 +116,8 @@ Expr List::parse(Assoc &env) {
                 return Expr(new Minus(parameters[0],parameters[1]));
             }
             else {
-                if(parameters.size() >= 3){
-                    return Expr(new MinusVar(parameters));
-                }
-                else {
-                    throw RuntimeError("Wrong number of agruments for -");
-                }
+                return Expr(new MinusVar(parameters));
+                
             }
         } else if (op_type == E_MUL) {
             //TODO: TO COMPLETE THE LOGIC
@@ -134,12 +125,7 @@ Expr List::parse(Assoc &env) {
                 return Expr(new Mult(parameters[0],parameters[1]));
             }
             else {
-                if(parameters.size() >=3){
                     return Expr(new MultVar(parameters));
-                }
-                else {
-                    throw RuntimeError("Wrong number of agruments for *");
-                }
             }
         }  else if (op_type == E_DIV) {
             //TODO: TO COMPLETE THE LOGIC
@@ -147,12 +133,7 @@ Expr List::parse(Assoc &env) {
                 return Expr(new Div(parameters[0],parameters[1]));
             } 
             else {
-                if(parameters.size() >=3){
                     return Expr(new DivVar(parameters));
-                }
-                else {
-                    throw RuntimeError("Wrong number of agruments for /");
-                }
             }
         } else if (op_type == E_MODULO) {
             if (parameters.size() != 2) {

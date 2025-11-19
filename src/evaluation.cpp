@@ -1233,9 +1233,9 @@ Value Apply::eval(Assoc &e) {
         //TODO
         args.push_back(arg->eval(e));
     }
-    if(clos_ptr->parameters.empty()){
-        return clos_ptr->e->eval(e);
-    }
+    //if(clos_ptr->parameters.empty()){
+    //    return clos_ptr->e->eval(e);
+    //}
     if (args.size() != clos_ptr->parameters.size()) throw RuntimeError("Wrong number of arguments 1 ");
     
     //TODO: TO COMPLETE THE PARAMETERS' ENVIRONMENT LOGIC

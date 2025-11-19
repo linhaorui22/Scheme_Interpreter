@@ -1173,14 +1173,21 @@ Value Not::evalRator(const Value &rand) { // not
     }
 }
 
+bool is_true(const Value& v) {
+    if (v->v_type == V_BOOL) {
+        return dynamic_cast<Boolean*>(v.get())->b;
+    }
+    return true; 
+}
+
 Value If::eval(Assoc &e) {
     //TODO: To complete the if logic
     Value ans = cond->eval(e);
-    if(ans->v_type == V_BOOL && !dynamic_cast<Boolean*>(ans.get())->b){
-        return alter->eval(e);
+    if(is_true(ans)){
+        return conseq->eval(e);
     } 
     else {
-        return conseq->eval(e);
+        return alter->eval(e);
     }
 }
 
@@ -1211,11 +1218,12 @@ Value Lambda::eval(Assoc &env) {
 }
 
 Value Apply::eval(Assoc &e) {
-    if (rator->eval(e)->v_type != V_PROC) {throw RuntimeError("Attempt to apply a non-procedure");}
+    Value proc_value = rator->eval(e);
+    if (proc_value->v_type != V_PROC) {throw RuntimeError("Attempt to apply a non-procedure");}
 
     //TODO: TO COMPLETE THE CLOSURE LOGIC
     Procedure* clos_ptr = 0;// 还没写
-    clos_ptr = dynamic_cast<Procedure*>(rator->eval(e).get());
+    clos_ptr = dynamic_cast<Procedure*>(proc_value.get());
     //TODO: TO COMPLETE THE ARGUMENT PARSER LOGIC
     if(clos_ptr == nullptr){
         throw RuntimeError("");
@@ -1225,7 +1233,10 @@ Value Apply::eval(Assoc &e) {
         //TODO
         args.push_back(arg->eval(e));
     }
-    if (args.size() != clos_ptr->parameters.size()) throw RuntimeError("Wrong number of arguments");
+    if(clos_ptr->parameters.empty()){
+        return clos_ptr->e->eval(e);
+    }
+    if (args.size() != clos_ptr->parameters.size()) throw RuntimeError("Wrong number of arguments 1 ");
     
     //TODO: TO COMPLETE THE PARAMETERS' ENVIRONMENT LOGIC
     Assoc param_env = clos_ptr->env;// hai mei xie

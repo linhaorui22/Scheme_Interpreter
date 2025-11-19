@@ -317,6 +317,9 @@ Value PlusVar::evalRator(const std::vector<Value> &args) { // + with multiple ar
     }
     else {
         Value ans = args[0];
+        if(ans->v_type != V_INT || ans->v_type != V_RATIONAL){
+            throw RuntimeError("");
+        }
         int l_args = args.size();
         if(l_args == 1){
             return ans;
@@ -1182,15 +1185,18 @@ Value Apply::eval(Assoc &e) {
     Procedure* clos_ptr = 0;// 还没写
     clos_ptr = dynamic_cast<Procedure*>(rator->eval(e).get());
     //TODO: TO COMPLETE THE ARGUMENT PARSER LOGIC
+    if(clos_ptr == nullptr){
+        throw RuntimeError("");
+    }
     std::vector<Value> args;
-    if (auto varNode = dynamic_cast<Variadic*>(clos_ptr->e.get())) {
+    for (auto& arg : rand ) {
         //TODO
-        args.push_back(varNode->eval(e));
+        args.push_back(arg->eval(e));
     }
     if (args.size() != clos_ptr->parameters.size()) throw RuntimeError("Wrong number of arguments");
     
     //TODO: TO COMPLETE THE PARAMETERS' ENVIRONMENT LOGIC
-    Assoc param_env = 0;// hai mei xie
+    Assoc param_env = clos_ptr->env;// hai mei xie
     for(int i =0 ; i < clos_ptr->parameters.size() ; i++){
         param_env = extend(clos_ptr->parameters[i],args[i],param_env);
     }
@@ -1225,9 +1231,13 @@ Value Letrec::eval(Assoc &env) {
     for(auto& new_bind : bind ){
         new_env = extend(new_bind.first,VoidV(),new_env);
     }
-    for(auto& new_bind : bind){
+    std::vector<std::pair<std::string, Value>> new_bindings;
+    for(auto& new_bind : bind) {
         Value ans = new_bind.second->eval(new_env);
-        modify(new_bind.first,ans,new_env);
+        new_bindings.push_back({new_bind.first, ans});
+    }
+    for(auto& new_binding : new_bindings) {
+        modify(new_binding.first, new_binding.second, new_env);
     }
     return body->eval(new_env);
 }

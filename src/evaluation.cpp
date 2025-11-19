@@ -93,7 +93,7 @@ Value Var::eval(Assoc &e) { // evaluation of variable
     if(check_number(c) || c == '.' || c == '@'){
         throw RuntimeError("");
     }
-    for(char t : x){
+    for(char c : x){
         if(c == '#' ||  c == '\'' || c == '\"' || c == '`' ){
             throw RuntimeError("");
         }
@@ -325,7 +325,6 @@ Value PlusVar::evalRator(const std::vector<Value> &args) { // + with multiple ar
             return ans;
         }
         else {
-            
             for(int i = 1 ; i < l_args; i ++){
                 Plus plus(Expr(nullptr),Expr(nullptr));
                 ans = plus.evalRator(ans,args[i]);
@@ -371,21 +370,33 @@ Value PlusVar::evalRator(const std::vector<Value> &args) { // + with multiple ar
 Value MinusVar::evalRator(const std::vector<Value> &args) { // - with multiple args
     //TODO: To complete the substraction logic
     if(args.size() == 0){
-        return IntegerV(0);
+        throw RuntimeError("");
     }
-    else {
+    else{
+        if(args.size() == 1){
+            Value result = args[0];
+            if(result->v_type == V_INT){
+                int n_result = dynamic_cast<Integer*>(result.get())->n;
+                return IntegerV(-n_result);
+            }
+            else {
+                if(result ->v_type == V_RATIONAL){
+                    int num_result = dynamic_cast<Rational*>(result.get())->numerator;
+                    int den_result = dynamic_cast<Rational*>(result.get())->denominator;
+                    return RationalV(-num_result,den_result);
+                }
+                else {
+                    throw RuntimeError("");
+                }
+            }
+        }
         Value ans = args[0];
         int l_args = args.size();
-        if(l_args == 1){
-            return ans;
+        for(int i = 1 ; i < l_args ; i++){
+            Minus minus(Expr(nullptr),Expr(nullptr));
+            ans = minus.evalRator(ans,args[i]);
         }
-        else {
-            for(int i = 1 ; i < l_args ; i++){
-                Minus minus(Expr(nullptr),Expr(nullptr));
-                ans = minus.evalRator(ans,args[i]);
-            }
-            return ans;
-        }
+        return ans;
         /*int ans_num,ans_den;
         if(ans->v_type == V_INT){
             ans_num = dynamic_cast<Integer*>(ans.get())->n;
@@ -424,7 +435,7 @@ Value MinusVar::evalRator(const std::vector<Value> &args) { // - with multiple a
 Value MultVar::evalRator(const std::vector<Value> &args) { // * with multiple args
     //TODO: To complete the multiplication logic
     if(args.size() == 0){
-        return IntegerV(0);
+        return IntegerV(1);
     }
     else {
         Value ans = args[0];
@@ -477,13 +488,34 @@ Value MultVar::evalRator(const std::vector<Value> &args) { // * with multiple ar
 Value DivVar::evalRator(const std::vector<Value> &args) { // / with multiple args
     //TODO: To complete the divisor logic
     if(args.size() == 0){
-        return IntegerV(0);
+        throw RuntimeError("");
     }
     else {
         Value ans = args[0];
         int l_args = args.size();
         if(l_args == 1){
-            return ans;
+            if(ans ->v_type == V_INT){
+                int n_ans = dynamic_cast<Integer*>(ans.get())->n;
+                if(n_ans == 0){
+                    throw RuntimeError("");
+                }
+                else {
+                    return RationalV(1,n_ans);
+                }
+            }
+            else  {
+                if(ans->v_type == V_RATIONAL){
+                    int num_ans = dynamic_cast<Rational*>(ans.get())->numerator;
+                    int den_ans = dynamic_cast<Rational*>(ans.get())->denominator;
+                    if(num_ans == 0){
+                        throw RuntimeError("");
+                    }
+                    if(den_ans % num_ans == 0){
+                        return IntegerV(int(den_ans/num_ans));
+                    }
+                    return RationalV(den_ans,num_ans);
+                }
+            }
         }
         /*
         else {

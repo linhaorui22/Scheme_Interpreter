@@ -1274,13 +1274,12 @@ Value Letrec::eval(Assoc &env) {
     for(auto& new_bind : bind ){
         new_env = extend(new_bind.first,VoidV(),new_env);
     }
-    std::vector<std::pair<std::string, Value>> new_bindings;
-    for(auto& new_bind : bind) {
-        Value ans = new_bind.second->eval(new_env);
-        new_bindings.push_back({new_bind.first, ans});
+    std::vector<Value> computed_values;
+    for(auto& binding : bind) {
+        computed_values.push_back(binding.second->eval(new_env));
     }
-    for(auto& new_binding : new_bindings) {
-        modify(new_binding.first, new_binding.second, new_env);
+    for(size_t i = 0; i < bind.size(); i++) {
+        modify(bind[i].first, computed_values[i], new_env);
     }
     return body->eval(new_env);
 }

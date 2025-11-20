@@ -318,7 +318,7 @@ Value PlusVar::evalRator(const std::vector<Value> &args) { // + with multiple ar
     else {
         Value ans = args[0];
         if(ans->v_type != V_INT || ans->v_type != V_RATIONAL){
-            throw RuntimeError("");
+            throw RuntimeError("5");
         }
         int l_args = args.size();
         if(l_args == 1){
@@ -370,7 +370,7 @@ Value PlusVar::evalRator(const std::vector<Value> &args) { // + with multiple ar
 Value MinusVar::evalRator(const std::vector<Value> &args) { // - with multiple args
     //TODO: To complete the substraction logic
     if(args.size() == 0){
-        throw RuntimeError("");
+        throw RuntimeError("3");
     }
     else{
         if(args.size() == 1){
@@ -386,7 +386,7 @@ Value MinusVar::evalRator(const std::vector<Value> &args) { // - with multiple a
                     return RationalV(-num_result,den_result);
                 }
                 else {
-                    throw RuntimeError("");
+                    throw RuntimeError("4");
                 }
             }
         }
@@ -488,7 +488,7 @@ Value MultVar::evalRator(const std::vector<Value> &args) { // * with multiple ar
 Value DivVar::evalRator(const std::vector<Value> &args) { // / with multiple args
     //TODO: To complete the divisor logic
     if(args.size() == 0){
-        throw RuntimeError("");
+        throw RuntimeError("22");
     }
     else {
         Value ans = args[0];
@@ -497,7 +497,7 @@ Value DivVar::evalRator(const std::vector<Value> &args) { // / with multiple arg
             if(ans ->v_type == V_INT){
                 int n_ans = dynamic_cast<Integer*>(ans.get())->n;
                 if(n_ans == 0){
-                    throw RuntimeError("");
+                    throw RuntimeError("7");
                 }
                 else {
                     return RationalV(1,n_ans);
@@ -508,7 +508,7 @@ Value DivVar::evalRator(const std::vector<Value> &args) { // / with multiple arg
                     int num_ans = dynamic_cast<Rational*>(ans.get())->numerator;
                     int den_ans = dynamic_cast<Rational*>(ans.get())->denominator;
                     if(num_ans == 0){
-                        throw RuntimeError("");
+                        throw RuntimeError("8");
                     }
                     if(den_ans % num_ans == 0){
                         return IntegerV(int(den_ans/num_ans));
@@ -1226,7 +1226,7 @@ Value Apply::eval(Assoc &e) {
     clos_ptr = dynamic_cast<Procedure*>(proc_value.get());
     //TODO: TO COMPLETE THE ARGUMENT PARSER LOGIC
     if(clos_ptr == nullptr){
-        throw RuntimeError("");
+        throw RuntimeError("1");
     }
     std::vector<Value> args;
     for (auto& arg : rand ) {

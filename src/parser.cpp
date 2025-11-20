@@ -394,19 +394,19 @@ Expr List::parse(Assoc &env) {
             case E_LAMBDA :{
                 int l_stxs = stxs.size();
                 if(l_stxs < 3){
-                    throw RuntimeError("");
+                    throw RuntimeError("11");
                 }
                 else {
                     List* list = dynamic_cast<List*>(stxs[1].get());
                     if(!list){
-                        throw RuntimeError("");
+                        throw RuntimeError("12");
                     }
                     else {
                         vector<string> parameters;
                         for(auto& stx : list->stxs){
                             SymbolSyntax* symbol = dynamic_cast<SymbolSyntax*>(stx.get());
-                            if(!symbol){
-                                throw RuntimeError("");
+                            if(symbol == nullptr){
+                                throw RuntimeError("55");
                             }
                             else {
                                 parameters.push_back(symbol->s);
@@ -420,7 +420,7 @@ Expr List::parse(Assoc &env) {
             case E_DEFINE :{
                 int l_stxs = stxs.size();
                 if(l_stxs < 3){
-                    throw RuntimeError("");
+                    throw RuntimeError("13");
                 }
                 else {
                     string define_str;
@@ -432,14 +432,14 @@ Expr List::parse(Assoc &env) {
                     if(list && list->stxs.empty()){
                         SymbolSyntax* define_name = dynamic_cast<SymbolSyntax*>(stxs[0].get());
                         if(!define_name){
-                            throw RuntimeError("");
+                            throw RuntimeError("14");
                         }
                         vector<string> parameters;
                         int l = list->stxs.size();
                         for(int i = 1;i < l; i++ ){
                             SymbolSyntax* para = dynamic_cast<SymbolSyntax*>(list->stxs[i].get());
                             if(!para){
-                                throw RuntimeError("");
+                                throw RuntimeError("15");
                             }
                             parameters.push_back(para->s);
                         }
@@ -455,17 +455,17 @@ Expr List::parse(Assoc &env) {
                 }
                 List* list = dynamic_cast<List*>(stxs[1].get());
                 if(!list){
-                    throw RuntimeError("");
+                    throw RuntimeError("16");
                 }
                 vector<pair<string,Expr>> pair_let;
                 for(auto& let_stx : list->stxs){
                     List* p = dynamic_cast<List*>(let_stx.get());
                     if(!p || p->stxs.size() != 2){
-                        throw RuntimeError("");
+                        throw RuntimeError("18");
                     }
                     SymbolSyntax* symbol = dynamic_cast<SymbolSyntax*>(p->stxs[0].get());//pi
                     if(!symbol){
-                        throw RuntimeError("");
+                        throw RuntimeError("17");
                     }
                     pair<string,Expr> pp = {symbol->s,p->stxs[1]->parse(env)};
                     pair_let.push_back(pp);
@@ -480,17 +480,17 @@ Expr List::parse(Assoc &env) {
                 }
                 List* list = dynamic_cast<List*>(stxs[1].get());
                 if(!list){
-                    throw RuntimeError("");
+                    throw RuntimeError("19");
                 }
                 vector<pair<string,Expr>> pair_letrec;
                 for(auto& let_stx : list->stxs){
                     List* p = dynamic_cast<List*>(let_stx.get());
                     if(!p || p->stxs.size() != 2){
-                        throw RuntimeError("");
+                        throw RuntimeError("31");
                     }
                     SymbolSyntax* symbol = dynamic_cast<SymbolSyntax*>(p->stxs[0].get());//pi
                     if(!symbol){
-                        throw RuntimeError("");
+                        throw RuntimeError("32");
                     }
                     pair<string,Expr> pp = {symbol->s,p->stxs[1]->parse(env)};
                     pair_letrec.push_back(pp);
@@ -505,7 +505,7 @@ Expr List::parse(Assoc &env) {
                 } 
                 SymbolSyntax* symbol = dynamic_cast<SymbolSyntax*>(stxs[1].get());
                 if(!symbol){
-                    throw RuntimeError("");
+                    throw RuntimeError("33");
                 }
                 return Expr(new Set(symbol->s,stxs[2]->parse(env)));
                 break;

@@ -392,7 +392,7 @@ Expr List::parse(Assoc &env) {
                 break;
             }
             case E_LAMBDA :{
-                int l_stxs = stxs.size();
+                /*int l_stxs = stxs.size();
                 if(l_stxs < 3){
                     throw RuntimeError("11");
                 }
@@ -413,6 +413,47 @@ Expr List::parse(Assoc &env) {
                             }
                         }
                         return Expr(new Lambda(parameters,stxs[2]->parse(env)));
+                    }
+                }
+                break;*/
+                int l_stxs = stxs.size();
+                if(l_stxs < 2){
+                    throw RuntimeError("");
+                }
+                else {
+                    List* param_list = dynamic_cast<List*>(stxs[1].get());
+                    if(!param_list){
+                        SymbolSyntax* single_param = dynamic_cast<SymbolSyntax*>(stxs[1].get());
+                        if(single_param){
+                            vector<string> parameters = {single_param->s};
+                        } else {
+                            throw RuntimeError("");
+                        }
+                    }
+                    else {
+                        vector<string> parameters;
+                        for(auto& stx : param_list->stxs){
+                            SymbolSyntax* symbol = dynamic_cast<SymbolSyntax*>(stx.get());
+                            if(symbol == nullptr){
+                                throw RuntimeError("");
+                            }
+                            else {
+                                parameters.push_back(symbol->s);
+                            }
+                        }
+                        if(l_stxs == 2){
+                            throw RuntimeError("");
+                        }
+                        else if(l_stxs == 3){
+                            return Expr(new Lambda(parameters, stxs[2]->parse(env)));
+                        }
+                        else {
+                            vector<Expr> bodyExprs;
+                            for(int i = 2; i < l_stxs; i++){
+                                bodyExprs.push_back(stxs[i]->parse(env));
+                            }
+                            return Expr(new Lambda(parameters, Expr(new Begin(bodyExprs))));
+                        }
                     }
                 }
                 break;

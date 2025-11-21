@@ -70,7 +70,7 @@ void REPL(){
             }
         }
         catch (const RuntimeError &RE){
-            //std :: cout << RE.message() << std :: endl;
+            std :: cout << RE.message() << std :: endl;
             std :: cout << "RuntimeError";
         }
         puts("");

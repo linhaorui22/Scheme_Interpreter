@@ -1236,7 +1236,7 @@ Value Apply::eval(Assoc &e) {
     //if(clos_ptr->parameters.empty()){
     //    return clos_ptr->e->eval(e);
     //}
-    if (args.size() != clos_ptr->parameters.size()) throw RuntimeError("Wrong number of arguments 1 ");
+    if (rand.size() != clos_ptr->parameters.size()) throw RuntimeError("Wrong number of arguments 1 ");
     
     //TODO: TO COMPLETE THE PARAMETERS' ENVIRONMENT LOGIC
     Assoc param_env = clos_ptr->env;// hai mei xie

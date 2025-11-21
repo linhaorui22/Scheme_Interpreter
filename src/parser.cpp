@@ -392,67 +392,18 @@ Expr List::parse(Assoc &env) {
                 break;
             }
             case E_LAMBDA :{
-                /*int l_stxs = stxs.size();
-                if(l_stxs < 3){
-                    throw RuntimeError("11");
-                }
-                else {
-                    List* list = dynamic_cast<List*>(stxs[1].get());
-                    if(!list){
-                        throw RuntimeError("12");
-                    }
-                    else {
-                        vector<string> parameters;
-                        for(auto& stx : list->stxs){
-                            SymbolSyntax* symbol = dynamic_cast<SymbolSyntax*>(stx.get());
-                            if(symbol == nullptr){
-                                throw RuntimeError("55");
-                            }
-                            else {
-                                parameters.push_back(symbol->s);
-                            }
+                if (stxs.size() == 3) {
+                    List* params_list = dynamic_cast<List*>(stxs[1].get());
+                    if (params_list) {
+                        bool all_id = true;
+                        for (auto &p : params_list->stxs) {
+                            if (!dynamic_cast<SymbolSyntax*>(p.get())) { all_id = false; break; }
                         }
-                        return Expr(new Lambda(parameters,stxs[2]->parse(env)));
-                    }
-                }
-                break;*/
-                int l_stxs = stxs.size();
-                if(l_stxs < 2){
-                    throw RuntimeError("");
-                }
-                else {
-                    List* param_list = dynamic_cast<List*>(stxs[1].get());
-                    if(!param_list){
-                        SymbolSyntax* single_param = dynamic_cast<SymbolSyntax*>(stxs[1].get());
-                        if(single_param){
-                            vector<string> parameters = {single_param->s};
-                        } else {
-                            throw RuntimeError("");
-                        }
-                    }
-                    else {
-                        vector<string> parameters;
-                        for(auto& stx : param_list->stxs){
-                            SymbolSyntax* symbol = dynamic_cast<SymbolSyntax*>(stx.get());
-                            if(symbol == nullptr){
-                                throw RuntimeError("");
-                            }
-                            else {
-                                parameters.push_back(symbol->s);
-                            }
-                        }
-                        if(l_stxs == 2){
-                            throw RuntimeError("");
-                        }
-                        else if(l_stxs == 3){
-                            return Expr(new Lambda(parameters, stxs[2]->parse(env)));
-                        }
-                        else {
-                            vector<Expr> bodyExprs;
-                            for(int i = 2; i < l_stxs; i++){
-                                bodyExprs.push_back(stxs[i]->parse(env));
-                            }
-                            return Expr(new Lambda(parameters, Expr(new Begin(bodyExprs))));
+                        if (all_id) {
+                            std::vector<std::string> params;
+                            for (auto &p : params_list->stxs) params.push_back(dynamic_cast<SymbolSyntax*>(p.get())->s);
+                            Expr body = stxs[2]->parse(env);
+                            return Expr(new Lambda(params, body));
                         }
                     }
                 }
@@ -541,14 +492,18 @@ Expr List::parse(Assoc &env) {
             }
             case E_SET:{
                 int l_stxs = stxs.size();
-                if(l_stxs != 3){
-                    throw RuntimeError("Wrong numver of agruments for set");
-                } 
-                SymbolSyntax* symbol = dynamic_cast<SymbolSyntax*>(stxs[1].get());
-                if(!symbol){
-                    throw RuntimeError("33");
+                if (l_stxs != 3) {
+                    vector<Expr> args;
+                    for (size_t i = 1; i < stxs.size(); ++i) args.push_back(stxs[i]->parse(env));
+                    return Expr(new Apply(Expr(new Var("set!")), args));
                 }
-                return Expr(new Set(symbol->s,stxs[2]->parse(env)));
+                SymbolSyntax* symbol = dynamic_cast<SymbolSyntax*>(stxs[1].get());
+                if (!symbol) {
+                    vector<Expr> args;
+                    for (size_t i = 1; i < stxs.size(); ++i) args.push_back(stxs[i]->parse(env));
+                    return Expr(new Apply(Expr(new Var("set!")), args));
+                }
+                return Expr(new Set(symbol->s, stxs[2]->parse(env)));
                 break;
             }
             // lambda define let letrec set  都还没写

@@ -374,6 +374,7 @@ Expr List::parse(Assoc &env) {
             }
             case E_COND :{
                 //有点复杂 还没写
+                if (stxs.size() < 2) throw RuntimeError("");
                 vector<vector<Expr>> clauses;
                 int l_stxs=stxs.size();
                 for(int i = 1;i < l_stxs ; i++){
@@ -421,8 +422,8 @@ Expr List::parse(Assoc &env) {
                         return Expr(new Define(symbol->s,stxs[2]->parse(env)));
                     }
                     List* list = dynamic_cast<List*>(stxs[1].get());
-                    if(list && list->stxs.empty()){
-                        SymbolSyntax* define_name = dynamic_cast<SymbolSyntax*>(stxs[0].get());
+                    if(list && !list->stxs.empty()){
+                        SymbolSyntax* define_name = dynamic_cast<SymbolSyntax*>(list->stxs[0].get());
                         if(!define_name){
                             throw RuntimeError("14");
                         }

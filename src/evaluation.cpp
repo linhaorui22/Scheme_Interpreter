@@ -98,26 +98,6 @@ Value Var::eval(Assoc &e) { // evaluation of variable
             throw RuntimeError("");
         }
     }
-    /*bool flag2 = false;
-    int start = 0;
-    if (!x.empty() && (x[0] == '+' || x[0] == '-')) {
-        start = 1;
-        if (x.length() == 1) {
-            flag1 = false;
-        }
-    }
-    for (int i = start; i < x.length() && flag1; i++) {
-        if (check_number(x[i])) {
-            flag2 = true;
-        } else if (x[i] == '.' || x[i] == 'e' || x[i] == 'E') {
-            continue;
-        } else {
-            flag1 = false;
-        }
-    }
-    if (flag1 && flag2) {
-        throw RuntimeError("");
-    }*/
     Value matched_value = find(x, e);
     if (matched_value.get() == nullptr) {
         if (primitives.count(x)) {
@@ -139,6 +119,19 @@ Value Var::eval(Assoc &e) { // evaluation of variable
                     {E_MODULO,   {new Modulo(new Var("parm1"), new Var("parm2")), {"parm1","parm2"}}},
                     {E_EXPT,     {new Expt(new Var("parm1"), new Var("parm2")), {"parm1","parm2"}}},
                     {E_EQQ,      {new EqualVar({}), {}}},
+                    {E_CONS,     {new Cons(new Var("parm1"), new Var("parm2")), {"parm1","parm2"}}},
+                    {E_CAR,      {new Car(new Var("parm")), {"parm"}}},
+                    {E_CDR,      {new Cdr(new Var("parm")), {"parm"}}},
+                    {E_SETCAR,   {new SetCar(new Var("parm1"), new Var("parm2")), {"parm1","parm2"}}},
+                    {E_SETCDR,   {new SetCdr(new Var("parm1"), new Var("parm2")), {"parm1","parm2"}}},
+                    {E_LIST,     {new ListFunc({}), {}}},
+                    {E_LT,       {new LessVar({}), {}}},
+                    {E_LE,       {new LessEqVar({}), {}}},
+                    {E_GE,       {new GreaterEqVar({}), {}}},
+                    {E_GT,       {new GreaterVar({}), {}}},
+                    {E_AND,      {new AndVar({}), {}}},
+                    {E_OR,       {new OrVar({}), {}}},
+                    {E_NOT,      {new Not(new Var("parm")), {"parm"}}}
             };
 
             auto it = primitive_map.find(primitives[x]);
@@ -697,144 +690,44 @@ Value Greater::evalRator(const Value &rand1, const Value &rand2) { // >
     }
 }
 
-Value LessVar::evalRator(const std::vector<Value> &args) { // < with multiple args
-    //TODO: To complete the less logic
-    int l_args = args.size();
-    if( l_args < 2){
-        throw RuntimeError("Wrong ...");
+Value LessVar::evalRator(const std::vector<Value> &args) {
+    if (args.size() < 2) throw RuntimeError("");
+    for (size_t i = 0; i + 1 < args.size(); ++i) {
+        if (compareNumericValues(args[i], args[i+1]) >= 0) return BooleanV(false);
     }
-    else {
-        for(int i = 0;i<l_args-1;i++){
-            if(check(static_cast<Value> (args[i]),static_cast<Value> (args[i+1]))){
-                int cmp = compareNumericValues(static_cast<Value> (args[i]),static_cast<Value> (args[i+1]));
-                if( cmp != -1){
-                    return BooleanV(false);
-                }
-            }
-            else {
-                throw("Wrong typename");
-            }
-           /* 
-            int cmp = compareNumericValues(static_cast<Value> (args[i]),static_cast<Value> (args[i+1]));
-            if(cmp != -1){
-                return BooleanV(false);
-            }
-            */
-        }
-        return BooleanV(true);
-    }
+    return BooleanV(true);
 }
 
-Value LessEqVar::evalRator(const std::vector<Value> &args) { // <= with multiple args
-    //TODO: To complete the lesseq logic
-    int l_args = args.size();
-    if( l_args < 2){
-        throw RuntimeError("Wrong ...");
+Value LessEqVar::evalRator(const std::vector<Value> &args) {
+    if (args.size() < 2) throw RuntimeError("");
+    for (size_t i = 0; i + 1 < args.size(); ++i) {
+        if (compareNumericValues(args[i], args[i+1]) > 0) return BooleanV(false);
     }
-    else {
-        for(int i = 0;i<l_args-1;i++){
-            if(check(static_cast<Value> (args[i]),static_cast<Value> (args[i+1]))){
-                int cmp = compareNumericValues(static_cast<Value> (args[i]),static_cast<Value> (args[i+1]));
-                if( cmp == 1){
-                    return BooleanV(false);
-                }
-            }
-            else {
-                throw("Wrong typename");
-            }
-           /* 
-            int cmp = compareNumericValues(static_cast<Value> (args[i]),static_cast<Value> (args[i+1]));
-            if(cmp != -1){
-                return BooleanV(false);
-            }
-            */
-        }
-        return BooleanV(true);
-    }
+    return BooleanV(true);
 }
 
-Value EqualVar::evalRator(const std::vector<Value> &args) { // = with multiple args
-    //TODO: To complete the equal logic
-    int l_args = args.size();
-    if( l_args < 2){
-        throw RuntimeError("Wrong ...");
+Value EqualVar::evalRator(const std::vector<Value> &args) {
+    if (args.size() < 2) throw RuntimeError("");
+    for (size_t i = 0; i + 1 < args.size(); ++i) {
+        if (compareNumericValues(args[i], args[i+1]) != 0) return BooleanV(false);
     }
-    else {
-        for(int i = 0;i<l_args-1;i++){
-            if(check(static_cast<Value> (args[i]),static_cast<Value> (args[i+1]))){
-                int cmp = compareNumericValues(static_cast<Value> (args[i]),static_cast<Value> (args[i+1]));
-                if( cmp != 0){
-                    return BooleanV(false);
-                }
-            }
-            else {
-                throw("Wrong typename");
-            }
-           /* 
-            int cmp = compareNumericValues(static_cast<Value> (args[i]),static_cast<Value> (args[i+1]));
-            if(cmp != -1){
-                return BooleanV(false);
-            }
-            */
-        }
-        return BooleanV(true);
-    }
+    return BooleanV(true);
 }
 
-Value GreaterEqVar::evalRator(const std::vector<Value> &args) { // >= with multiple args
-    //TODO: To complete the greatereq logic
-    int l_args = args.size();
-    if( l_args < 2){
-        throw RuntimeError("Wrong ...");
+Value GreaterEqVar::evalRator(const std::vector<Value> &args) {
+    if (args.size() < 2) throw RuntimeError("");
+    for (size_t i = 0; i + 1 < args.size(); ++i) {
+        if (compareNumericValues(args[i], args[i+1]) < 0) return BooleanV(false);
     }
-    else {
-        for(int i = 0;i<l_args-1;i++){
-            if(check(static_cast<Value> (args[i]),static_cast<Value> (args[i+1]))){
-                int cmp = compareNumericValues(static_cast<Value> (args[i]),static_cast<Value> (args[i+1]));
-                if( cmp == -1){
-                    return BooleanV(false);
-                }
-            }
-            else {
-                throw("Wrong typename");
-            }
-           /* 
-            int cmp = compareNumericValues(static_cast<Value> (args[i]),static_cast<Value> (args[i+1]));
-            if(cmp != -1){
-                return BooleanV(false);
-            }
-            */
-        }
-        return BooleanV(true);
-    }
+    return BooleanV(true);
 }
 
-Value GreaterVar::evalRator(const std::vector<Value> &args) { // > with multiple args
-    //TODO: To complete the greater logic
-    int l_args = args.size();
-    if( l_args < 2){
-        throw RuntimeError("Wrong ...");
+Value GreaterVar::evalRator(const std::vector<Value> &args) {
+    if (args.size() < 2) throw RuntimeError("");
+    for (size_t i = 0; i + 1 < args.size(); ++i) {
+        if (compareNumericValues(args[i], args[i+1]) <= 0) return BooleanV(false);
     }
-    else {
-        for(int i = 0;i<l_args-1;i++){
-            if(check(static_cast<Value> (args[i]),static_cast<Value> (args[i+1]))){
-                int cmp = compareNumericValues(static_cast<Value> (args[i]),static_cast<Value> (args[i+1]));
-                if( cmp != 1){
-                    return BooleanV(false);
-                }
-            }
-            else {
-                throw("Wrong typename");
-            }
-           /* 
-            int cmp = compareNumericValues(static_cast<Value> (args[i]),static_cast<Value> (args[i+1]));
-            if(cmp != -1){
-                return BooleanV(false);
-            }
-            */
-        }
-        return BooleanV(true);
-    }
+    return BooleanV(true);
 }
 
 Value Cons::evalRator(const Value &rand1, const Value &rand2) { // cons
@@ -877,6 +770,9 @@ Value IsList::evalRator(const Value &rand) { // list?
 
 Value Car::evalRator(const Value &rand) { // car
     //TODO: To complete the car logic
+    if(rand.get() == nullptr){
+        throw RuntimeError("");
+    }
     if(rand->v_type != V_PAIR){
         throw RuntimeError("Wrong typename 1");
     }
@@ -886,6 +782,9 @@ Value Car::evalRator(const Value &rand) { // car
 
 Value Cdr::evalRator(const Value &rand) { // cdr
     //TODO: To complete the cdr logic
+    if(rand.get() == nullptr){
+        throw RuntimeError("");
+    }
     if(rand->v_type != V_PAIR){
         throw RuntimeError("Wrong typename 2");
     }
@@ -895,6 +794,12 @@ Value Cdr::evalRator(const Value &rand) { // cdr
 
 Value SetCar::evalRator(const Value &rand1, const Value &rand2) { // set-car!
     //TODO: To complete the set-car! logic
+    if(rand1.get() == nullptr){
+        throw RuntimeError("");
+    }
+    if(rand2.get() == nullptr){
+        throw RuntimeError("");
+    }
     if(rand1->v_type != V_PAIR){
         throw RuntimeError("Wrong typename 3");
     }
@@ -905,6 +810,12 @@ Value SetCar::evalRator(const Value &rand1, const Value &rand2) { // set-car!
 
 Value SetCdr::evalRator(const Value &rand1, const Value &rand2) { // set-cdr!
    //TODO: To complete the set-cdr! logic
+   if(rand1.get() == nullptr){
+        throw RuntimeError("");
+    }
+    if(rand2.get() == nullptr){
+        throw RuntimeError("");
+    }
    if(rand1->v_type != V_PAIR){
         throw RuntimeError("Wrong typename 4");
     }
@@ -967,147 +878,91 @@ Value IsString::evalRator(const Value &rand) { // string?
 
 Value Begin::eval(Assoc &e) {
     //TODO: To complete the begin logic
-    if(es.empty()){
+    if (es.empty()) {
         return VoidV();
-    }    
-    Value ans = NullV();
-    int l_es = es.size();
-    for(int i = 0;i<l_es;i++){
-        ans = es[i]->eval(e);
     }
-    return ans;
+    for (size_t i = 0; i + 1 < es.size(); ++i) {
+        if (!es[i].get()) throw RuntimeError("begin: null expression in sequence");
+        (void)es[i]->eval(e);
+    }
+    if (!es.back().get()) throw RuntimeError("begin: null expression in sequence");
+    return es.back()->eval(e);
 }
 
 Value Quote::eval(Assoc& e) {
-    //TODO: To complete the quote logic
-    if(auto num_syn = dynamic_cast<Number*>(s.get())){
+    if (auto num_syn = dynamic_cast<Number*>(s.get())) {
         return IntegerV(num_syn->n);
     }
-    else {
-        if(auto str_syn = dynamic_cast<SymbolSyntax*>(s.get())){
-            return SymbolV(str_syn->s);
+    if (auto sym_syn = dynamic_cast<SymbolSyntax*>(s.get())) {
+        return SymbolV(sym_syn->s);
+    }
+    if (auto true_syn = dynamic_cast<TrueSyntax*>(s.get())) {
+        return BooleanV(true);
+    }
+    if (auto false_syn = dynamic_cast<FalseSyntax*>(s.get())) {
+        return BooleanV(false);
+    }
+    if (auto str_syn = dynamic_cast<StringSyntax*>(s.get())) {
+        return StringV(str_syn->s);
+    }
+    if (auto list_syn = dynamic_cast<List*>(s.get())) {
+        if (list_syn->stxs.empty()) return NullV();
+
+        int l_stxs = (int)list_syn->stxs.size();
+
+        int dot_num = 0;
+        int dot_pos = -1;
+        for (int i = 0; i < l_stxs; ++i) {
+            if (auto maybe_sym = dynamic_cast<SymbolSyntax*>(list_syn->stxs[i].get())) {
+                if (maybe_sym->s == ".") {
+                    ++dot_num;
+                    dot_pos = i;
+                }
+            }
         }
-        else {
-            if(auto true_syn = dynamic_cast<TrueSyntax*>(s.get())){
-                return BooleanV(true);
+
+        bool is_dotted = (dot_num == 1 && l_stxs >= 3 && dot_pos == l_stxs - 2);
+
+        if (is_dotted) {
+
+            Value front = NullV();
+            for (int i = dot_pos - 1; i >= 0; --i) {
+                Value elem = Quote(list_syn->stxs[i]).eval(e);
+                front = PairV(elem, front);
             }
-            else {
-                if(auto false_syn = dynamic_cast<FalseSyntax*>(s.get())){
-                    return BooleanV(false);
-                }
-                else {
-                    if(auto list_syn = dynamic_cast<List*>(s.get())){
-                        if(list_syn->stxs.empty()){
-                            return NullV();
-                        }
-                        
-                        int dot_num = 0;
-                        int dot_pos = -1;
-                        int l_stxs = list_syn->stxs.size();
-                        for(int i = 0 ; i < l_stxs ; i++){
-                            if(auto sym = dynamic_cast<SymbolSyntax*>(list_syn->stxs[i].get())){
-                                if(sym->s == "."){
-                                    dot_num ++;
-                                    dot_pos = i;
-                                }
-                            }
-                        }
-                        //std::cout<<1<<std::endl;
-                        if(dot_num > 0 ){
-                            if(dot_num > 1){
-                                //std::cout<<2<<std::endl;
-                                throw RuntimeError("a");
-                            }
-                            if(dot_pos != l_stxs - 2){
-                                //std::cout<<3<<std::endl;
-                                throw RuntimeError("b");
-                            }
-                            if(dot_pos == 0 || dot_pos == l_stxs - 1){
-                                //std::cout<<4<<std::endl;
-                                throw RuntimeError("c");
-                            }
-                            Value car = NullV();
-                            for(int i = dot_pos - 1 ; i >= 0 ; i --){
-                                Value now = Quote(list_syn->stxs[i]).eval(e);
-                                car = PairV(now,car);
-                            }
-                            Value cdr = Quote(list_syn->stxs[dot_pos+1]).eval(e);
-                            if(dot_pos > 1){
-                                Value now = car;
-                                while(now->v_type == V_PAIR){
-                                    Pair* pair = dynamic_cast<Pair*>(now.get());
-                                    if(pair->cdr->v_type == V_NULL){
-                                        pair->cdr = cdr;
-                                        break;
-                                    }
-                                    now = pair->cdr;
-                                }
-                                return car;
-                            }
-                            else {
-                                return PairV(Quote(list_syn->stxs[0]).eval(e),cdr);
-                            }
-                        }
-                        else {
-                            Value ans = NullV();
-                            for(int i = l_stxs - 1 ; i >= 0 ;i --){
-                                Value now = Quote(list_syn->stxs[i]).eval(e);
-                                ans = PairV(now,ans);
-                            }
-                            return ans;
-                        }
-                        
-                        /*if (list_syn->stxs.size() == 3) {
-                            auto first = dynamic_cast<SymbolSyntax*>(list_syn->stxs[1].get());
-                            if (first && first->s == ".") {
-                                Value car = Quote(list_syn->stxs[0]).eval(e);
-                                Value cdr = Quote(list_syn->stxs[2]).eval(e);
-                                return PairV(car, cdr);
-                            }
-                        }
-                        for (size_t i = 0; i < list_syn->stxs.size(); i++) {
-                            auto dot_sym = dynamic_cast<SymbolSyntax*>(list_syn->stxs[i].get());
-                            if (dot_sym && dot_sym->s == ".") {
-                                if (i < 1 || i >= list_syn->stxs.size() - 1) {
-                                    throw RuntimeError("");
-                                }
-                                Value front = NullV();
-                                for (int j = i - 1; j >= 0; j--) {
-                                    Value current = Quote(list_syn->stxs[j]).eval(e);
-                                    front = PairV(current, front);
-                                }
-                                Value tail = Quote(list_syn->stxs[i + 1]).eval(e);
-                                if (front->v_type == V_NULL) {
-                                    return tail;
-                                } else {
-                                    Value current = front;
-                                    while (current->v_type == V_PAIR) {
-                                        Pair* pair = dynamic_cast<Pair*>(current.get());
-                                        if (pair->cdr->v_type == V_NULL) {
-                                            pair->cdr = tail;
-                                            break;
-                                        }
-                                    current = pair->cdr;
-                                    }
-                                    return front;
-                                }
-                            }
-                        }
-                        Value ans = NullV();
-                        for (int i = list_syn->stxs.size() - 1; i >= 0; i--) {
-                            Value now = Quote(list_syn->stxs[i]).eval(e);
-                            ans = PairV(now, ans);
-                        }
-                        return ans;*/
-                    }
-                }
+            Value tail = Quote(list_syn->stxs[dot_pos + 1]).eval(e);
+            if (front->v_type == V_NULL) {
+                return tail;
             }
+            Value cur = front;
+            while (cur->v_type == V_PAIR) {
+                Pair* p = dynamic_cast<Pair*>(cur.get());
+                if (p->cdr->v_type == V_NULL) {
+                    p->cdr = tail;
+                    break;
+                }
+                cur = p->cdr;
+            }
+            return front;
+        } else {
+            Value ans = NullV();
+            for (int i = l_stxs - 1; i >= 0; --i) {
+                Value elem = Quote(list_syn->stxs[i]).eval(e);
+                ans = PairV(elem, ans);
+            }
+            return ans;
         }
     }
-    return NullV();
+
+    throw RuntimeError("");
 }
 
-
+bool is_true(const Value& v) {
+    if (v->v_type == V_BOOL) {
+        return dynamic_cast<Boolean*>(v.get())->b;
+    }
+    return true; 
+}
 
 Value AndVar::eval(Assoc &e) { // and with short-circuit evaluation
     //TODO: To complete the and logic
@@ -1124,16 +979,15 @@ Value AndVar::eval(Assoc &e) { // and with short-circuit evaluation
     }
     return BooleanV(flag);
     */
-    if(rands.empty()){
-        return BooleanV(true);//判断是否为空 
-    }
-    int  l_rands = rands.size();
-    for(int i = 0 ;i < l_rands-1 ; i++){
-        if(rands[i]->eval(e)->v_type == V_BOOL && !dynamic_cast<Boolean*>(rands[i]->eval(e).get())->b){
-            return BooleanV(false);
+    if (rands.empty()) return BooleanV(true); 
+    Value last = NullV();
+    for (size_t i = 0; i < rands.size(); ++i) {
+        last = rands[i]->eval(e);     
+        if (!is_true(last)) {        
+            return last;
         }
     }
-    return rands[l_rands-1]->eval(e);
+    return last;
 }
 
 Value OrVar::eval(Assoc &e) { // or with short-circuit evaluation
@@ -1151,43 +1005,30 @@ Value OrVar::eval(Assoc &e) { // or with short-circuit evaluation
     }
     return BooleanV(flag);
     */
-    if(rands.empty()){
-        return BooleanV(false);
+    if (rands.empty()) return BooleanV(false); 
+    for (size_t i = 0; i < rands.size(); ++i) {
+        Value v = rands[i]->eval(e);  
+        if (is_true(v)) return v;    
     }
-    int l_rands = rands.size();
-    for(int i = 0 ; i < l_rands-1 ; i++){
-        if(rands[i]->eval(e)->v_type != V_BOOL || dynamic_cast<Boolean*>(rands[i]->eval(e).get())->b){
-            return rands[i]->eval(e);
-        }
-    }
-    return rands[l_rands-1]->eval(e);
+    return BooleanV(false);
 }
 
 Value Not::evalRator(const Value &rand) { // not
     //TODO: To complete the not logic
-    if( rand->v_type == V_BOOL && !dynamic_cast<Boolean*>(rand.get())->b){
-        return BooleanV(true);
-    }
-    else {
-        return BooleanV(false);
-    }
+    if (!rand.get()) throw RuntimeError("");
+    return BooleanV(!is_true(rand));
 }
 
-bool is_true(const Value& v) {
-    if (v->v_type == V_BOOL) {
-        return dynamic_cast<Boolean*>(v.get())->b;
-    }
-    return true; 
-}
+
 
 Value If::eval(Assoc &e) {
     //TODO: To complete the if logic
     Value ans = cond->eval(e);
     if(is_true(ans)){
-        return conseq->eval(e);
+        return conseq.get() ? conseq->eval(e) : VoidV();
     } 
     else {
-        return alter->eval(e);
+        return alter.get() ? alter->eval(e) : VoidV();
     }
 }
 
@@ -1197,14 +1038,24 @@ Value Cond::eval(Assoc &env) {
         if(clause.empty()){
             continue;
         }
-        if(clause.size() >= 2){
-            Value ans = clause[0]->eval(env);
-            if(ans->v_type != V_BOOL || dynamic_cast<Boolean*>(ans.get())->b){
-                Value result = clause[1]->eval(env);
-                int l_clause = clause.size();
-                for(int i = 2;i< l_clause;i++){
-                    result = clause[i]->eval(env);
+        if (auto sym = dynamic_cast<SymbolSyntax*>(clause[0].get())) {
+            if (sym->s == "else") {
+                if (clause.size() == 1) {
+                    throw RuntimeError("");
                 }
+                Value result = VoidV();
+                for (size_t i = 1; i < clause.size(); ++i) result = clause[i]->eval(env);
+                return result;
+            }
+        }
+
+        Value test = clause[0]->eval(env);
+        if (is_true(test)) {
+            if (clause.size() == 1) {
+                return test;
+            } else {
+                Value result = VoidV();
+                for (size_t i = 1; i < clause.size(); ++i) result = clause[i]->eval(env);
                 return result;
             }
         }
@@ -1219,37 +1070,39 @@ Value Lambda::eval(Assoc &env) {
 
 Value Apply::eval(Assoc &e) {
     Value proc_value = rator->eval(e);
-    if (proc_value->v_type != V_PROC) {throw RuntimeError("Attempt to apply a non-procedure");}
-
-    //TODO: TO COMPLETE THE CLOSURE LOGIC
-    Procedure* clos_ptr = 0;// 还没写
-    clos_ptr = dynamic_cast<Procedure*>(proc_value.get());
-    //TODO: TO COMPLETE THE ARGUMENT PARSER LOGIC
-    if(clos_ptr == nullptr){
-        throw RuntimeError("1");
+    if (!proc_value.get()) throw RuntimeError("");
+    if (proc_value->v_type != V_PROC) {
+        throw RuntimeError("");
+    }
+    Procedure* clos_ptr = dynamic_cast<Procedure*>(proc_value.get());
+    if (!clos_ptr) {
+        throw RuntimeError("");
     }
     std::vector<Value> args;
-    for (auto& arg : rand ) {
-        //TODO
-        args.push_back(arg->eval(e));
+    args.reserve(rand.size());
+    for (auto &arg_expr : rand) {
+        if (!arg_expr.get()) throw RuntimeError("");
+        args.push_back(arg_expr->eval(e));
     }
-    //if(clos_ptr->parameters.empty()){
-    //    return clos_ptr->e->eval(e);
-    //}
-    if (rand.size() != clos_ptr->parameters.size()) throw RuntimeError("Wrong number of arguments 1 ");
-    
-    //TODO: TO COMPLETE THE PARAMETERS' ENVIRONMENT LOGIC
-    Assoc param_env = clos_ptr->env;// hai mei xie
-    for(int i =0 ; i < clos_ptr->parameters.size() ; i++){
-        param_env = extend(clos_ptr->parameters[i],args[i],param_env);
+    if (args.size() != clos_ptr->parameters.size()) {
+        throw RuntimeError("Wrong number of arguments");
     }
-    return clos_ptr->e->eval(param_env);
+    Assoc call_env = clos_ptr->env;
+    for (size_t i = 0; i < clos_ptr->parameters.size(); ++i) {
+        call_env = extend(clos_ptr->parameters[i], args[i], call_env);
+    }
+    return clos_ptr->e->eval(call_env);
 }
 
 Value Define::eval(Assoc &env) {
     //TODO: To complete the define logic
+    if (!e.get()) throw RuntimeError("");
     Value value = e->eval(env);
-    modify(var,value,env);
+    try {
+        modify(var, value, env);
+    } catch (const std::exception&) {
+        env = extend(var, value, env);
+    }
     return VoidV();
 }
 
@@ -1260,7 +1113,7 @@ Value Let::eval(Assoc &env) {
         Value put_bind = binds.second->eval(env);
         std::pair<std::string,Value> p = {binds.first,put_bind};
         let_bind.push_back(p);
-    } // 让每个变量等于表达式的值
+    } 
     Assoc new_env = env;
     for(auto& new_bind : let_bind){
         new_env = extend(new_bind.first,new_bind.second,new_env);
@@ -1286,8 +1139,15 @@ Value Letrec::eval(Assoc &env) {
 
 Value Set::eval(Assoc &env) {
     //TODO: To complete the set logic
-    Value ans = e->eval(env);
-    modify(var,ans,env);
+    if (!e.get()) throw RuntimeError("");
+    Value val = e->eval(env);
+
+    try {
+        modify(var, val, env);
+    } catch (const std::exception&) {
+        throw RuntimeError("");
+    }
+
     return VoidV();
 }
 
